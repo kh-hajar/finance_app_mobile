@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // ─── COULEURS PRINCIPALES ─────────────────────────────────
 
-  static const Color primaryGreen = Color(0xFF00C896);
-  static const Color incomeColor = Color(0xFF00C896);
+  static const Color primaryColor = Color(0xFFB8246E); // Rose-Purple foncé tendance
+  static const Color primaryGreen = primaryColor; // Redirigé pour compatibilité des imports
+  static const Color incomeColor = Color(0xFF10B981); // Vert émeraude pour les revenus
   static const Color expenseColor = Color(0xFFFF5B5B);
 
   // ─── SURFACES ─────────────────────────────────────────────

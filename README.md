@@ -6,6 +6,21 @@ Ce projet s'inscrit dans le cadre académique pour valider les compétences avan
 
 ---
 
+## 📸 Captures d'écran
+
+Vous trouverez ci-dessous les visuels clés de l'application. Pour les afficher sur GitHub, déposez vos captures d'écran au format PNG dans le dossier `screenshots` à la racine du projet sous les noms spécifiés.
+
+| Connexion & Inscription | Tableau de Bord | Transactions | Budgets Mensuels |
+| :---: | :---: | :---: | :---: |
+| <img src="screenshots/auth.png" width="180" /> | <img src="screenshots/dashboard.png" width="180" /> | <img src="screenshots/transactions.png" width="180" /> | <img src="screenshots/budgets.png" width="180" /> |
+
+| Statistiques & Analyses | Centre de Notifications | Paramètres |
+| :---: | :---: | :---: |
+| <img src="screenshots/stats.png" width="180" /> | <img src="screenshots/notifications.png" width="180" /> | <img src="screenshots/settings.png" width="180" /> |
+
+
+---
+
 ## 🎯 Objectifs Pédagogiques Couverts
 
 L'application a été entièrement conçue et structurée pour répondre aux exigences du projet :
