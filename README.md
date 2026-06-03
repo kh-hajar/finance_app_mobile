@@ -10,13 +10,13 @@ Ce projet s'inscrit dans le cadre académique pour valider les compétences avan
 
 Vous trouverez ci-dessous les visuels clés de l'application. Pour les afficher sur GitHub, déposez vos captures d'écran au format PNG dans le dossier `screenshots` à la racine du projet sous les noms spécifiés.
 
-| Connexion & Inscription | Tableau de Bord | Transactions | Budgets Mensuels |
+| Connexion & Inscription | Tableau de Bord | Transactions | Saisie de Transaction |
 | :---: | :---: | :---: | :---: |
-| <img src="screenshots/auth.png" width="180" /> | <img src="screenshots/dashboard.png" width="180" /> | <img src="screenshots/transactions.png" width="180" /> | <img src="screenshots/budgets.png" width="180" /> |
+| <img src="screenshots/auth.png" width="180" /> | <img src="screenshots/dashboard.png" width="180" /> | <img src="screenshots/transactions.png" width="180" /> | <img src="screenshots/ajTran.png" width="180" /> |
 
-| Statistiques & Analyses | Centre de Notifications | Paramètres |
-| :---: | :---: | :---: |
-| <img src="screenshots/stats.png" width="180" /> | <img src="screenshots/notifications.png" width="180" /> | <img src="screenshots/settings.png" width="180" /> |
+| Budgets Mensuels | Statistiques & Analyses | Centre de Notifications | Paramètres |
+| :---: | :---: | :---: | :---: |
+| <img src="screenshots/budgets.png" width="180" /> | <img src="screenshots/stats.png" width="180" /> | <img src="screenshots/notifications.png" width="180" /> | <img src="screenshots/settings.png" width="180" /> |
 
 
 ---
