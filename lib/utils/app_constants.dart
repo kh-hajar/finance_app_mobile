@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AppConstants {
-  static const String appName = 'NextStep Finance';
+  static const String appName = 'Financia';
   static const String appVersion = '1.0.0';
 
   // ─── ROUTES ───────────────────────────────────────────────

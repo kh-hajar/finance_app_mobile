@@ -6,10 +6,14 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/transaction_controller.dart';
 import '../../controllers/theme_controller.dart';
+import '../../controllers/budget_controller.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_theme.dart';
 import '../widgets/summary_card.dart';
 import '../widgets/transaction_card.dart';
+import '../widgets/animated_list_item.dart';
+import '../../controllers/notification_controller.dart';
+import 'widgets/notification_bottom_sheet.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -19,9 +23,11 @@ class DashboardView extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final txCtrl = context.watch<TransactionController>();
     final theme = context.watch<ThemeController>();
+    final notifCtrl = context.watch<NotificationController>();
     final isDark = theme.isDarkMode;
     final user = auth.currentUser;
     final currency = theme.currency;
+    final unreadCount = notifCtrl.unreadCount;
 
     final recentTransactions = txCtrl.transactions.take(5).toList();
     final monthLabel = AppHelpers.formatMonthYear(
@@ -32,7 +38,11 @@ class DashboardView extends StatelessWidget {
         child: RefreshIndicator(
           onRefresh: () async {
             if (user != null) {
-              await txCtrl.loadData(user.id!);
+              await Future.wait([
+                txCtrl.loadData(user.id!),
+                context.read<BudgetController>().loadBudgets(user.id!),
+                context.read<NotificationController>().loadNotifications(user.id!),
+              ]);
             }
           },
           color: AppTheme.primaryGreen,
@@ -71,27 +81,67 @@ class DashboardView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Bouton notifications (décoratif)
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppTheme.cardDark
-                              : AppTheme.cardLight,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withOpacity(0.06)
-                                : Colors.grey.withOpacity(0.12),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          size: 20,
-                          color: isDark
-                              ? AppTheme.textPrimaryDark
-                              : AppTheme.textPrimaryLight,
+                      // Bouton notifications
+                      GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const NotificationBottomSheet(),
+                          );
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppTheme.cardDark
+                                    : AppTheme.cardLight,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white.withOpacity(0.06)
+                                      : Colors.grey.withOpacity(0.12),
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.notifications_outlined,
+                                size: 20,
+                                color: isDark
+                                    ? AppTheme.textPrimaryDark
+                                    : AppTheme.textPrimaryLight,
+                              ),
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                right: -2,
+                                top: -2,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.expenseColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '$unreadCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -106,37 +156,46 @@ class DashboardView extends StatelessWidget {
                   child: Column(
                     children: [
                       // Carte solde principal
-                      SummaryCard(
-                        label: 'SOLDE DISPONIBLE',
-                        amount: AppHelpers.formatAmount(
-                            txCtrl.balance, currency),
-                        icon: Icons.account_balance_wallet_rounded,
-                        color: txCtrl.balance >= 0
-                            ? AppTheme.primaryGreen
-                            : AppTheme.expenseColor,
-                        isLarge: true,
+                      AnimatedListItem(
+                        index: 0,
+                        child: SummaryCard(
+                          label: 'SOLDE DISPONIBLE',
+                          amount: AppHelpers.formatAmount(
+                              txCtrl.balance, currency),
+                          icon: Icons.account_balance_wallet_rounded,
+                          color: txCtrl.balance >= 0
+                              ? AppTheme.primaryGreen
+                              : AppTheme.expenseColor,
+                          isLarge: true,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       // Revenus + Dépenses
                       Row(
                         children: [
                           Expanded(
-                            child: SummaryCard(
-                              label: 'Revenus',
-                              amount: AppHelpers.formatAmount(
-                                  txCtrl.totalIncome, currency),
-                              icon: Icons.arrow_downward_rounded,
-                              color: AppTheme.incomeColor,
+                            child: AnimatedListItem(
+                              index: 1,
+                              child: SummaryCard(
+                                label: 'Revenus',
+                                amount: AppHelpers.formatAmount(
+                                    txCtrl.totalIncome, currency),
+                                icon: Icons.arrow_downward_rounded,
+                                color: AppTheme.incomeColor,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: SummaryCard(
-                              label: 'Dépenses',
-                              amount: AppHelpers.formatAmount(
-                                  txCtrl.totalExpense, currency),
-                              icon: Icons.arrow_upward_rounded,
-                              color: AppTheme.expenseColor,
+                            child: AnimatedListItem(
+                              index: 2,
+                              child: SummaryCard(
+                                label: 'Dépenses',
+                                amount: AppHelpers.formatAmount(
+                                    txCtrl.totalExpense, currency),
+                                icon: Icons.arrow_upward_rounded,
+                                color: AppTheme.expenseColor,
+                              ),
                             ),
                           ),
                         ],
@@ -238,17 +297,20 @@ class DashboardView extends StatelessWidget {
                     delegate: SliverChildBuilderDelegate(
                       (ctx, i) {
                         final t = recentTransactions[i];
-                        return TransactionCard(
-                          transaction: t,
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            AppConstants.routeEditTransaction,
-                            arguments: t,
+                        return AnimatedListItem(
+                          index: i + 3, // décalage après les 3 cartes
+                          child: TransactionCard(
+                            transaction: t,
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              AppConstants.routeEditTransaction,
+                              arguments: t,
+                            ),
+                            onDelete: () async {
+                              await txCtrl.deleteTransaction(
+                                  t.id!, user!.id!);
+                            },
                           ),
-                          onDelete: () async {
-                            await txCtrl.deleteTransaction(
-                                t.id!, user!.id!);
-                          },
                         );
                       },
                       childCount: recentTransactions.length,

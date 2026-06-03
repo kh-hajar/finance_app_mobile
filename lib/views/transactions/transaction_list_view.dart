@@ -8,6 +8,7 @@ import '../../controllers/theme_controller.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_theme.dart';
 import '../widgets/transaction_card.dart';
+import '../widgets/animated_list_item.dart';
 
 class TransactionListView extends StatelessWidget {
   const TransactionListView({super.key});
@@ -120,16 +121,22 @@ class TransactionListView extends StatelessWidget {
                         itemCount: txCtrl.filteredTransactions.length,
                         itemBuilder: (ctx, i) {
                           final t = txCtrl.filteredTransactions[i];
-                          return TransactionCard(
-                            transaction: t,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppConstants.routeEditTransaction,
-                              arguments: t,
+                          return AnimatedListItem(
+                            index: i,
+                            child: TransactionCard(
+                              transaction: t,
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppConstants.routeEditTransaction,
+                                arguments: t,
+                              ),
+                              onDelete: () async {
+                                if (userId != null) {
+                                  await txCtrl.deleteTransaction(
+                                      t.id!, userId);
+                                }
+                              },
                             ),
-                            onDelete: () async {
-                              await txCtrl.deleteTransaction(t.id!, userId!);
-                            },
                           );
                         },
                       ),

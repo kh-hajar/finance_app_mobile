@@ -7,6 +7,7 @@ import '../../controllers/auth_controller.dart';
 import '../../controllers/transaction_controller.dart';
 import '../../controllers/budget_controller.dart';
 import '../../controllers/theme_controller.dart';
+import '../../controllers/notification_controller.dart';
 import '../dashboard/dashboard_view.dart';
 import '../transactions/transaction_list_view.dart';
 import '../budgets/budget_view.dart';
@@ -47,6 +48,7 @@ class _HomeViewState extends State<HomeView> {
     await Future.wait([
       context.read<TransactionController>().loadData(userId),
       context.read<BudgetController>().loadBudgets(userId),
+      context.read<NotificationController>().loadNotifications(userId),
     ]);
   }
 

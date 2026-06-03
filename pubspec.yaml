@@ -57,6 +57,10 @@ dependencies:
   # Requêtes HTTP — API REST (json-server)
   http: ^1.2.1
 
+  # Notifications locales — alertes budget dépassé
+  flutter_local_notifications: ^18.0.1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

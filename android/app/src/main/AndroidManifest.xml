@@ -2,7 +2,7 @@
     <!-- Permission Internet — requise pour les appels HTTP vers json-server -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="finance_app"
+        android:label="Financia"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -32,6 +32,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        
+        <!-- Désactiver Impeller pour corriger les bugs d'affichage 3D/glitchs graphiques étirés sur l'émulateur -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -13,6 +13,7 @@ import '../../models/category_model.dart';
 import '../../utils/app_constants.dart';
 import '../../utils/app_theme.dart';
 import '../widgets/budget_bar.dart';
+import '../widgets/animated_list_item.dart';
 
 class BudgetView extends StatelessWidget {
   const BudgetView({super.key});
@@ -92,25 +93,28 @@ class BudgetView extends StatelessWidget {
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (ctx, i) {
                         final budget = budgetCtrl.budgets[i];
-                        return Dismissible(
-                          key: Key('budget_${budget.id}'),
-                          direction: DismissDirection.endToStart,
-                          background: Container(
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            decoration: BoxDecoration(
-                              color: AppTheme.expenseColor.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(16),
+                        return AnimatedListItem(
+                          index: i,
+                          child: Dismissible(
+                            key: Key('budget_${budget.id}'),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              decoration: BoxDecoration(
+                                color: AppTheme.expenseColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(Icons.delete_rounded,
+                                  color: AppTheme.expenseColor),
                             ),
-                            child: const Icon(Icons.delete_rounded,
-                                color: AppTheme.expenseColor),
+                            onDismissed: (_) async {
+                              await budgetCtrl.deleteBudget(
+                                  budget.id!, userId!);
+                            },
+                            child: BudgetBar(
+                                budget: budget, currency: theme.currency),
                           ),
-                          onDismissed: (_) async {
-                            await budgetCtrl.deleteBudget(
-                                budget.id!, userId!);
-                          },
-                          child: BudgetBar(
-                              budget: budget, currency: theme.currency),
                         );
                       },
                     ),

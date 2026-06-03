@@ -10,6 +10,7 @@ import 'controllers/auth_controller.dart';
 import 'controllers/transaction_controller.dart';
 import 'controllers/budget_controller.dart';
 import 'controllers/theme_controller.dart';
+import 'controllers/notification_controller.dart';
 
 // Views
 import 'views/splash/splash_view.dart';
@@ -21,6 +22,7 @@ import 'views/transactions/transaction_form_view.dart';
 // Utils
 import 'utils/app_constants.dart';
 import 'utils/app_theme.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +32,9 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  // Initialiser les notifications locales
+  await NotificationService().init();
 
   // Style de la barre de statut
   SystemChrome.setSystemUIOverlayStyle(
@@ -53,6 +58,7 @@ class FinanceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => TransactionController()),
         ChangeNotifierProvider(create: (_) => BudgetController()),
+        ChangeNotifierProvider(create: (_) => NotificationController()),
       ],
       child: Consumer<ThemeController>(
         builder: (context, themeCtrl, _) {

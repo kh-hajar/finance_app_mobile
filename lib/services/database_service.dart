@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../models/budget_model.dart';
+import '../models/notification_model.dart';
 
 class DatabaseService {
   // Singleton pattern
@@ -17,13 +18,14 @@ class DatabaseService {
   static Future<Database>? _initFuture; // Garde la Future d'init pour éviter les appels concurrents
 
   static const String _dbName = 'finance_app.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 2;
 
   // Noms des tables
   static const String tableUsers = 'users';
   static const String tableTransactions = 'transactions';
   static const String tableCategories = 'categories';
   static const String tableBudgets = 'budgets';
+  static const String tableNotifications = 'notifications';
 
   /// Retourne l'instance de la base de données (thread-safe)
   Future<Database> get database async {
@@ -109,10 +111,35 @@ class DatabaseService {
         FOREIGN KEY (categoryId) REFERENCES $tableCategories(id)
       )
     ''');
+
+    // Table notifications
+    await db.execute('''
+      CREATE TABLE $tableNotifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        isRead INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (userId) REFERENCES $tableUsers(id)
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Gérer les migrations futures
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE $tableNotifications (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          message TEXT NOT NULL,
+          createdAt TEXT NOT NULL,
+          isRead INTEGER NOT NULL DEFAULT 0,
+          FOREIGN KEY (userId) REFERENCES $tableUsers(id)
+        )
+      ''');
+    }
   }
 
   // ─── USERS ───────────────────────────────────────────────
@@ -309,6 +336,85 @@ class DatabaseService {
     final db = await database;
     return await db
         .delete(tableBudgets, where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ─── NOTIFICATIONS ───────────────────────────────────────
+
+  Future<int> insertNotification(NotificationModel notification) async {
+    final db = await database;
+    return await db.insert(tableNotifications, notification.toMap());
+  }
+
+  Future<List<NotificationModel>> getNotificationsByUser(int userId) async {
+    final db = await database;
+    final maps = await db.query(
+      tableNotifications,
+      where: 'userId = ?',
+      whereArgs: [userId],
+      orderBy: 'createdAt DESC',
+    );
+    return maps.map((m) => NotificationModel.fromMap(m)).toList();
+  }
+
+  Future<int> markNotificationAsRead(int id) async {
+    final db = await database;
+    return await db.update(
+      tableNotifications,
+      {'isRead': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> markAllNotificationsAsRead(int userId) async {
+    final db = await database;
+    return await db.update(
+      tableNotifications,
+      {'isRead': 1},
+      where: 'userId = ? AND isRead = 0',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<int> deleteNotification(int id) async {
+    final db = await database;
+    return await db.delete(
+      tableNotifications,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> clearAllNotifications(int userId) async {
+    final db = await database;
+    return await db.delete(
+      tableNotifications,
+      where: 'userId = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  /// Vérifie si une notification pour cette catégorie/mois/année a déjà été émise pour ce type
+  Future<bool> hasBudgetNotificationForMonth({
+    required int userId,
+    required String categoryName,
+    required int month,
+    required int year,
+    required String type, // 'exceeded' ou 'warning'
+  }) async {
+    final db = await database;
+    final monthStr = month.toString().padLeft(2, '0');
+    final datePattern = '$year-$monthStr%';
+    
+    String titleKeyword = type == 'exceeded' ? '%dépassé%' : '%presque%';
+    
+    final result = await db.query(
+      tableNotifications,
+      where: 'userId = ? AND title LIKE ? AND title LIKE ? AND createdAt LIKE ?',
+      whereArgs: [userId, titleKeyword, '%$categoryName%', datePattern],
+      limit: 1,
+    );
+    return result.isNotEmpty;
   }
 
   /// Ferme la base de données
